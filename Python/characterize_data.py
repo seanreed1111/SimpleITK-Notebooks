@@ -343,7 +343,7 @@ def inspect_single_series(series_data, meta_data_keys=[]):
     return series_info
 
 
-def inspect_series(root_dir, meta_data_keys=[], additional_column_names=[]):
+def inspect_series(root_dir, meta_data_keys=None, additional_column_names=None):
     """
     Inspect all series found in the directory structure. A series does not have to
     be in a single directory (the files are located in the subtree and combined
@@ -363,6 +363,9 @@ def inspect_series(root_dir, meta_data_keys=[], additional_column_names=[]):
     -------
     pandas DataFrame: Each row in the data frame corresponds to a single file.
     """
+    if meta_data_keys is None: meta_data_keys = []
+    if additional_column_names is None: additional_column_names = []
+    
     if len(meta_data_keys) != len(additional_column_names):
         raise ValueError("Number of additional column names does not match expected.")
     column_names = [
@@ -406,16 +409,23 @@ def inspect_series(root_dir, meta_data_keys=[], additional_column_names=[]):
     return pd.DataFrame(res, columns=column_names)
 
 
+## fix this to put in default arguments of Data and Output 
 def main(argv=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "root_of_data_directory", help="path to the topmost directory containing data"
+        "--dir", 
+        default="../Data",
+        help="path to the root directory containing data files"
     )
-    parser.add_argument("output_file", help="output csv file path")
     parser.add_argument(
-        "analysis_type",
-        default="per_file",
+        "--output", 
+        default="./Output/output.csv",
+        help="output csv file path"
+    )
+    parser.add_argument(
+        "--analyze",
+        default="per_series",
         help='type of analysis, "per_file" or "per_series"',
     )
     parser.add_argument(
@@ -449,33 +459,37 @@ def main(argv=None):
     )
 
     args = parser.parse_args(argv)
+    print("args are \n", args)
+    # sys.exit(0)
     if len(args.external_applications) != len(args.external_applications_headings):
         print("Number of external applications and their headings do not match.")
         sys.exit(1)
     if len(args.metadata_keys) != len(args.metadata_keys_headings):
         print("Number of metadata keys and their headings do not match.")
+        print(args.metadata_keys)
+        print(args.metadata_keys_headings)
         sys.exit(1)
-    if args.analysis_type not in ["per_file", "per_series"]:
+    if args.analyze not in ["per_file", "per_series"]:
         print("Unexpected analysis type.")
         sys.exit(1)
 
-    if args.analysis_type == "per_file":
+    if args.analyze == "per_file":
         df = inspect_files(
-            args.root_of_data_directory,
+            args.dir,
             imageIO=args.imageIO,
             meta_data_keys=args.metadata_keys,
             external_programs=args.external_applications,
             additional_column_names=args.metadata_keys_headings
             + args.external_applications_headings,
         )
-    elif args.analysis_type == "per_series":
+    elif args.analyze == "per_series":
         df = inspect_series(
-            args.root_of_data_directory,
+            args.dir,
             meta_data_keys=args.metadata_keys,
             additional_column_names=args.metadata_keys_headings,
         )
     # save the raw information
-    df.to_csv(args.output_file, index=False)
+    df.to_csv(args.output, index=False)
 
     # minimal analysis on the image information, detect image duplicates and plot the image size
     # distribution and distribution of min/max intensity values of scalar
@@ -488,7 +502,7 @@ def main(argv=None):
     ].sort_values(by=["MD5 intensity hash"])
     if not duplicates.empty:
         duplicates.to_csv(
-            f"{os.path.splitext(args.output_file)[0]}_duplicates.csv", index=False
+            f"{os.path.splitext(args.output)[0]}_duplicates.csv", index=False
         )
 
     size_counts = (
@@ -534,7 +548,7 @@ def main(argv=None):
             ax.containers[0], fontsize=fontsize_pt
         )  # add the number at the top of each bar
         plt.savefig(
-            f"{os.path.splitext(args.output_file)[0]}_image_size_distribution.pdf",
+            f"{os.path.splitext(args.output)[0]}_image_size_distribution.pdf",
             bbox_inches="tight",
         )
 
@@ -561,7 +575,7 @@ def main(argv=None):
         plt.xlabel("intensity")
         plt.ylabel("# of images")
         plt.savefig(
-            f"{os.path.splitext(args.output_file)[0]}_min_max_intensity_distribution.pdf",
+            f"{os.path.splitext(args.output)[0]}_min_max_intensity_distribution.pdf",
             bbox_inches="tight",
         )
 
