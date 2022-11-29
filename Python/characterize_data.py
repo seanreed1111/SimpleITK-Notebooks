@@ -3,6 +3,7 @@ import SimpleITK as sitk
 import pandas as pd
 import numpy as np
 import os
+import pathlib
 import sys
 import shutil
 import subprocess
@@ -489,6 +490,8 @@ def main(argv=None):
             additional_column_names=args.metadata_keys_headings,
         )
     # save the raw information
+    # if args.output does not exist, create the directories
+    pathlib.Path(args.output).parent.mkdir(parents=True, exist_ok=True) 
     df.to_csv(args.output, index=False)
 
     # minimal analysis on the image information, detect image duplicates and plot the image size
