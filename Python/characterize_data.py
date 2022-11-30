@@ -364,9 +364,11 @@ def inspect_series(root_dir, meta_data_keys=None, additional_column_names=None):
     -------
     pandas DataFrame: Each row in the data frame corresponds to a single file.
     """
-    if meta_data_keys is None: meta_data_keys = []
-    if additional_column_names is None: additional_column_names = []
-    
+    if meta_data_keys is None:
+        meta_data_keys = []
+    if additional_column_names is None:
+        additional_column_names = []
+
     if len(meta_data_keys) != len(additional_column_names):
         raise ValueError("Number of additional column names does not match expected.")
     column_names = [
@@ -410,19 +412,17 @@ def inspect_series(root_dir, meta_data_keys=None, additional_column_names=None):
     return pd.DataFrame(res, columns=column_names)
 
 
-## fix this to put in default arguments of Data and Output 
+## fix this to put in default arguments of Data and Output
 def main(argv=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--dir", 
+        "--dir",
         default="../Data",
-        help="path to the root directory containing data files"
+        help="path to the root directory containing data files",
     )
     parser.add_argument(
-        "--output", 
-        default="./Output/output.csv",
-        help="output csv file path"
+        "--output", default="./Output/output.csv", help="output csv file path"
     )
     parser.add_argument(
         "--analyze",
@@ -491,7 +491,9 @@ def main(argv=None):
         )
     # save the raw information
     # if args.output does not exist, create the directories
-    pathlib.Path(args.output).parent.mkdir(parents=True, exist_ok=True) 
+    import pathlib
+
+    pathlib.Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(args.output, index=False)
 
     # minimal analysis on the image information, detect image duplicates and plot the image size
