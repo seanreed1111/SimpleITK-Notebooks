@@ -1,4 +1,4 @@
-#DicomSeriesHelper.py
+# DicomSeriesHelper.py
 import SimpleITK as sitk
 import pandas as pd
 import numpy as np
@@ -23,6 +23,7 @@ import ipympl
 
 # Maximal number of parallel processes we run.
 MAX_PROCESSES = 100
+
 
 def process_image(img, projection_axis, thumbnail_size):
     """
@@ -131,7 +132,11 @@ def visualize_single_file(file_name, imageIO, projection_axis, thumbnail_size):
 
 
 def visualize_files(
-    root_dir, imageIO="", projection_axis=2, thumbnail_size=[128, 128], tile_size=[20, 20]
+    root_dir,
+    imageIO="",
+    projection_axis=2,
+    thumbnail_size=[128, 128],
+    tile_size=[20, 20],
 ):
     """
     This function traverses the directory structure reading all user selected images
@@ -321,10 +326,11 @@ def process_series(series_data, projection_axis, thumbnail_size):
         img = reader.Execute()
         return process_image(img, projection_axis, thumbnail_size)
 
+
 # The class in the following cell `ImageSelection` provides a GUI for displaying and interacting with a tiled faux volume. The user can scroll through the faux volume "slices", zoom in, pan, and select images. When the user clicks on an image a user specified action is taken, `selection_func` is invoked with the file name(s) of the associated image. Two useful user functions are provided at the end of the code cell:
 # * `show_image` - displays the original image at full resolution using an external viewer (both 2D and 3D).
 # * `rm_image` - for the more confident user, delete the file(s) associated with the selected image (data cleanup).
-# 
+#
 # The recommended usage is with the `show_image` ensuring that the images you selected should truly be deleted and then deleting them.
 
 # In[37]:
